@@ -26,6 +26,9 @@ No special requirements.
 ![index page](./assets/images/screenshot_index.jpeg)
 - Index page
 
+![index page](./assets/images/screenshot_result.jpeg)
+- Result page after search
+
 
 ## License
 Copyright © 2022 [Claire Cho](https://github.com/clairehwcho).
