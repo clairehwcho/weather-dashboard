@@ -115,7 +115,26 @@ main {
     border: 1px solid black;
 }
 
+.result-container h4 {
+    margin: 1rem 0;
+}
+
 .future-container {
     width: 100%;
+    display: flex;
+    justify-content: space-between;
     margin: 1rem 0;
+}
+
+.card {
+    width: 150px;
+    height: 200px;
+    color: white;
+    background-color: var(--darkgray);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+}
+
+.future-date {
+    font-weight: bolder;
 }
