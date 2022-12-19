@@ -147,8 +147,6 @@ const displaySavedCityButton = function () {
 
         savedCityButton.addEventListener('click', savedCityButtonClickHandler);
     };
-
-    clearButton.addEventListener('click', clearButtonClickHandler);
 }
 
 // The getCurrentWeather requests the current weather data to API.
