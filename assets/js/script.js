@@ -50,7 +50,6 @@ const displayCurrentWeather = function (data) {
         return;
     };
 
-    // Clear the innerHTML of current weather container.
     currentContainerEl.innerHTML = '';
 
     const heading = document.createElement('h2');
@@ -84,7 +83,6 @@ const displayFutureWeather = function (data) {
         return;
     }
 
-    // Clear the innerHTML of future weather container.
     futureContainerEl.innerHTML = '';
 
     for (let i = 0; i < data.list.length; i++) {
@@ -129,7 +127,7 @@ const displayFutureWeather = function (data) {
 // The displaySavedCityButton function creates and renders a button under the search bar when search is done.
 const displaySavedCityButton = function () {
     const cityArr = getCityFromStorage();
-    console.log(cityArr);
+
     if (!cityArr) {
         console.log("No search history to be rendered");
         return;
@@ -149,7 +147,7 @@ const displaySavedCityButton = function () {
     };
 }
 
-// The getCurrentWeather requests the current weather data to API.
+// The getCurrentWeather requests the current weather data to third-party API.
 const getCurrentWeather = function (cityname) {
     const apiUrl = 'https://api.openweathermap.org/data/2.5/weather?q=' + cityname + '&appid=' + APIKey;
 
@@ -162,18 +160,17 @@ const getCurrentWeather = function (cityname) {
                     displayCurrentWeather(data);
                     storeCityToStorage(data.name);
                     displaySavedCityButton();
-
                 });
             } else {
                 alert('Error: ' + response.statusText);
             }
         })
         .catch(function (error) {
-            alert('Unable to connect to OpenWeather');
+            alert('Unable to connect to OpenWeatherMap');
         });
 }
 
-// The getFutureWeather function requests the weather data of the next 5 days to API.
+// The getFutureWeather function requests the next 5-day weather data to third-party API.
 const getFutureWeather = function (cityname) {
     const apiUrl = 'https://api.openweathermap.org/data/2.5/forecast?q=' + cityname + '&appid=' + APIKey;
 
@@ -190,11 +187,11 @@ const getFutureWeather = function (cityname) {
             }
         })
         .catch(function (error) {
-            alert('Unable to connect to OpenWeather');
+            alert('Unable to connect to OpenWeatherMap');
         });
 }
 
-// The formSubmitHandler function calls the functions to get data from API.
+// The formSubmitHandler function calls the functions to get data from third-party API.
 const formSubmitHandler = function (event) {
     event.preventDefault();
 
@@ -210,10 +207,9 @@ const formSubmitHandler = function (event) {
     }
 };
 
-// The savedCityButtonClickHandler function calls the functions to get data from API.
+// The savedCityButtonClickHandler function calls the functions to get data from third-party API.
 const savedCityButtonClickHandler = function (event) {
     const savedCity = event.target.getAttribute('data-city');
-    console.log(savedCity);
 
     if (savedCity) {
         getCurrentWeather(savedCity);
@@ -224,4 +220,5 @@ const savedCityButtonClickHandler = function (event) {
 // The formSubmitHandler function is called when the form is submitted.
 searchFormEl.addEventListener('submit', formSubmitHandler);
 
+// The search history is displayed on page load.
 displaySavedCityButton();
