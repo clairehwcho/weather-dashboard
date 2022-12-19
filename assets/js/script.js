@@ -6,9 +6,6 @@ const searchHistoryListEl = document.querySelector('.search-history-list');
 const currentContainerEl = document.querySelector('.current-container');
 const futureContainerEl = document.querySelector('.future-container');
 
-// const savedCityButton = document.createElement('li');
-// savedCityButton.classList = 'saved-city-btn button';;
-
 // Save reference to API key.
 const APIKey = '53887a25456014fd75935a098671a048';
 
@@ -148,8 +145,10 @@ const displaySavedCityButton = function () {
         savedCityButton.textContent = currentCity;
         searchHistoryListEl.append(savedCityButton);
 
-        savedCityButton.addEventListener('click', buttonClickHandler);
+        savedCityButton.addEventListener('click', savedCityButtonClickHandler);
     };
+
+    clearButton.addEventListener('click', clearButtonClickHandler);
 }
 
 // The getCurrentWeather requests the current weather data to API.
@@ -213,8 +212,8 @@ const formSubmitHandler = function (event) {
     }
 };
 
-// The buttonClickHandler function calls the functions to get data from API.
-const buttonClickHandler = function (event) {
+// The savedCityButtonClickHandler function calls the functions to get data from API.
+const savedCityButtonClickHandler = function (event) {
     const savedCity = event.target.getAttribute('data-city');
     console.log(savedCity);
 
