@@ -3,80 +3,55 @@ const searchFormEl = document.querySelector('.search-form');
 const cityInputEl = document.querySelector('#search-term');
 const searchButtonEl = document.querySelector('.search-btn');
 const searchHistoryListEl = document.querySelector('.search-history-list');
-const savedCityButtonEl = document.querySelector('saved-city-btn');
 const currentContainerEl = document.querySelector('.current-container');
 const futureContainerEl = document.querySelector('.future-container');
 
-const APIKey = '53887a25456014fd75935a098671a048'
+// const savedCityButton = document.createElement('li');
+// savedCityButton.classList = 'saved-city-btn button';;
 
-const formSubmitHandler = function (event) {
-    event.preventDefault();
+// Save reference to API key.
+const APIKey = '53887a25456014fd75935a098671a048';
 
-    const city = cityInputEl.value.trim();
-
-    if (city) {
-        getCurrentWeather(city);
-        getFutureWeather(city);
-
-        cityInputEl.value = '';
-    } else {
-        alert('The entered city cannot be found. Please try again.')
+// The getCityFromStorage function returns an array of cities that have been searched.
+const getCityFromStorage = function (cityname) {
+    const cityArr = localStorage.getItem('city');
+    if (cityArr) {
+        storedCityArr = JSON.parse(cityArr);
+        console.log("Search history found from local storage");
+        return storedCityArr;
+    }
+    else {
+        console.log("No search history found from local storage");
+        return null;
     }
 };
 
-const buttonClickHandler = function (event) {
-    const savedCity = event.target.getAttribute('data-city');
-
-    if (savedCity) {
-        getCurrentWeather(savedCity);
+// The storecityToStorage function stores search history to local storage.
+const storeCityToStorage = function (cityname) {
+    if (!localStorage["city"]) {
+        const newCityArr = [];
+        newCityArr.push(cityname);
+        localStorage.setItem("city", JSON.stringify(newCityArr));
     }
+    else {
+        const cityArr = getCityFromStorage();
+        if (!cityArr.includes(cityname)) {
+            cityArr.push(cityname);
+            localStorage.setItem("city", JSON.stringify(cityArr));
+        }
+        else {
+            return;
+        }
+    }
+    console.log("Search history stored in local storage");
 };
 
-const getCurrentWeather = function (cityname) {
-    const apiUrl = 'https://api.openweathermap.org/data/2.5/weather?q=' + cityname + '&appid=' + APIKey;
-
-    fetch(apiUrl)
-        .then(function (response) {
-            if (response.ok) {
-                console.log(response);
-                response.json().then(function (data) {
-                    console.log(data);
-                    displayCurrentWeather(data);
-                });
-            } else {
-                alert('Error: ' + response.statusText);
-            }
-        })
-        .catch(function (error) {
-            alert('Unable to connect to OpenWeather');
-        });
-}
-
-const getFutureWeather = function (cityname) {
-    const apiUrl = 'https://api.openweathermap.org/data/2.5/forecast?q=' + cityname + '&appid=' + APIKey;
-
-    fetch(apiUrl)
-        .then(function (response) {
-            if (response.ok) {
-                console.log(response);
-                response.json().then(function (data) {
-                    console.log(data);
-                    displayFutureWeather(data);
-                });
-            } else {
-                alert('Error: ' + response.statusText);
-            }
-        })
-        .catch(function (error) {
-            alert('Unable to connect to OpenWeather');
-        });
-}
-
+// The displayCurrentWeather function renders the current weather condition.
 const displayCurrentWeather = function (data) {
     if (data.length === 0) {
-        currentContainerEl.textContent = 'No forecast data found.';
+        currentContainerEl.textContent = 'No weather data found.';
         return;
-    }
+    };
 
     // Clear the innerHTML of current weather container.
     currentContainerEl.innerHTML = '';
@@ -105,6 +80,7 @@ const displayCurrentWeather = function (data) {
     currentContainerEl.append(heading, temp, wind, humidity);
 };
 
+// The displayFutureWeather function renders the weather conditions of the next 5 days.
 const displayFutureWeather = function (data) {
     if (data.length === 0) {
         futureContainerEl.appendChild('p', 'No forecast data found.');
@@ -126,8 +102,9 @@ const displayFutureWeather = function (data) {
         card.classList = 'card';
 
         const currentDate = data.list[i];
+        const today = dayjs().format('YYYY-MM-DD');
 
-        if (currentDate["dt_txt"].includes("12:00:00")) {
+        if (!currentDate["dt_txt"].includes(today) && currentDate["dt_txt"].includes("09:00:00")) {
             const unformattedDate = currentDate["dt_txt"].substring(0, 10).split('-');
             const formattedDate = unformattedDate[1] + "/" + unformattedDate[2] + "/" + unformattedDate[0];
             date.textContent = formattedDate
@@ -152,5 +129,102 @@ const displayFutureWeather = function (data) {
     }
 }
 
+// The displaySavedCityButton function creates and renders a button under the search bar when search is done.
+const displaySavedCityButton = function () {
+    const cityArr = getCityFromStorage();
+    console.log(cityArr);
+    if (!cityArr) {
+        console.log("No search history to be rendered");
+        return;
+    };
+
+    searchHistoryListEl.innerHTML = '';
+
+    for (let i = 0; i < cityArr.length; i++) {
+        const savedCityButton = document.createElement('li');
+        savedCityButton.classList = 'saved-city-btn button';;
+        const currentCity = cityArr[i];
+        savedCityButton.setAttribute('data-city', currentCity);
+        savedCityButton.textContent = currentCity;
+        searchHistoryListEl.append(savedCityButton);
+
+        savedCityButton.addEventListener('click', buttonClickHandler);
+    };
+}
+
+// The getCurrentWeather requests the current weather data to API.
+const getCurrentWeather = function (cityname) {
+    const apiUrl = 'https://api.openweathermap.org/data/2.5/weather?q=' + cityname + '&appid=' + APIKey;
+
+    fetch(apiUrl)
+        .then(function (response) {
+            if (response.ok) {
+                console.log(response);
+                response.json().then(function (data) {
+                    console.log(data);
+                    displayCurrentWeather(data);
+                    storeCityToStorage(data.name);
+                    displaySavedCityButton();
+
+                });
+            } else {
+                alert('Error: ' + response.statusText);
+            }
+        })
+        .catch(function (error) {
+            alert('Unable to connect to OpenWeather');
+        });
+}
+
+// The getFutureWeather function requests the weather data of the next 5 days to API.
+const getFutureWeather = function (cityname) {
+    const apiUrl = 'https://api.openweathermap.org/data/2.5/forecast?q=' + cityname + '&appid=' + APIKey;
+
+    fetch(apiUrl)
+        .then(function (response) {
+            if (response.ok) {
+                console.log(response);
+                response.json().then(function (data) {
+                    console.log(data);
+                    displayFutureWeather(data);
+                });
+            } else {
+                alert('Error: ' + response.statusText);
+            }
+        })
+        .catch(function (error) {
+            alert('Unable to connect to OpenWeather');
+        });
+}
+
+// The formSubmitHandler function calls the functions to get data from API.
+const formSubmitHandler = function (event) {
+    event.preventDefault();
+
+    const city = cityInputEl.value.trim();
+
+    if (city) {
+        getCurrentWeather(city);
+        getFutureWeather(city);
+
+        cityInputEl.value = '';
+    } else {
+        alert('Please enter a correct name of city.')
+    }
+};
+
+// The buttonClickHandler function calls the functions to get data from API.
+const buttonClickHandler = function (event) {
+    const savedCity = event.target.getAttribute('data-city');
+    console.log(savedCity);
+
+    if (savedCity) {
+        getCurrentWeather(savedCity);
+        getFutureWeather(savedCity);
+    }
+};
+
+// The formSubmitHandler function is called when the form is submitted.
 searchFormEl.addEventListener('submit', formSubmitHandler);
-// savedCityButtonEl.addEventListener('click', buttonClickHandler);
+
+displaySavedCityButton();
